@@ -31,9 +31,16 @@ libfuse.unconfigure(function (err) { })
 You should configure libfuse using the above API before using the
 shared library, otherwise the program using fuse will error.
 
-When configuring the only thing this module does is copy
-the fuse kernel extension and some helpers to `/Library/Filesystems/osxfuse.fs`,
-and tries to load the kernel extension once.
+When configuring, this module copies a FUSE bundle payload (`macfuse.fs.tgz` or
+`osxfuse.fs.tgz`) into `/Library/Filesystems/macfuse.fs` or
+`/Library/Filesystems/osxfuse.fs`, applies ownership/permissions, and tries to load the kernel extension once.
+
+The payload is discovered from common paths, including:
+
+- `MACFUSE_TGZ` / `OSXFUSE_TGZ`
+- bundled package payloads under `./osxfuse`
+- `/usr/local/lib` and `/opt/homebrew/lib`
+- Homebrew Cask locations for macFUSE
 
 The first time it loads on mac a user prompt will trigger that allows
 you to accept the kernel extension.
