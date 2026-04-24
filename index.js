@@ -3,8 +3,28 @@ const { spawn } = require('child_process')
 const path = require('path')
 
 const OSXFUSE = path.join(__dirname, 'osxfuse')
-const lib = path.join(OSXFUSE, 'libosxfuse.dylib')
-const include = path.join(OSXFUSE, 'include')
+const include = firstExistingPath([
+  path.join(OSXFUSE, 'include'),
+  '/usr/local/include/fuse',
+  '/opt/homebrew/include/fuse',
+  process.env.HOMEBREW_PREFIX ? path.join(process.env.HOMEBREW_PREFIX, 'include/fuse') : null
+]) || path.join(OSXFUSE, 'include')
+const lib = firstExistingPath([
+  path.join(OSXFUSE, 'libosxfuse.dylib'),
+  path.join(OSXFUSE, 'libfuse.dylib'),
+  '/usr/local/lib/libosxfuse.2.dylib',
+  '/usr/local/lib/libosxfuse.dylib',
+  '/usr/local/lib/libfuse.2.dylib',
+  '/usr/local/lib/libfuse.dylib',
+  '/opt/homebrew/lib/libosxfuse.2.dylib',
+  '/opt/homebrew/lib/libosxfuse.dylib',
+  '/opt/homebrew/lib/libfuse.2.dylib',
+  '/opt/homebrew/lib/libfuse.dylib',
+  process.env.HOMEBREW_PREFIX ? path.join(process.env.HOMEBREW_PREFIX, 'lib/libosxfuse.2.dylib') : null,
+  process.env.HOMEBREW_PREFIX ? path.join(process.env.HOMEBREW_PREFIX, 'lib/libosxfuse.dylib') : null,
+  process.env.HOMEBREW_PREFIX ? path.join(process.env.HOMEBREW_PREFIX, 'lib/libfuse.2.dylib') : null,
+  process.env.HOMEBREW_PREFIX ? path.join(process.env.HOMEBREW_PREFIX, 'lib/libfuse.dylib') : null
+]) || path.join(OSXFUSE, 'libosxfuse.dylib')
 
 const MAC_BUNDLE = '/Library/Filesystems/macfuse.fs'
 const OSX_BUNDLE = '/Library/Filesystems/osxfuse.fs'
@@ -209,6 +229,14 @@ function getNotFoundError () {
 function markerFor (sourceName) {
   if (!sourceName) return 'configured-by-fuse-shared-library-darwin\n'
   return ('configured-by-fuse-shared-library-darwin:' + sourceName + '\n')
+}
+
+function firstExistingPath (paths) {
+  for (const p of paths) {
+    if (!p) continue
+    if (fs.existsSync(p)) return p
+  }
+  return null
 }
 
 function noop () {}
