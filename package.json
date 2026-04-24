@@ -9,6 +9,9 @@
   "scripts": {
     "test": "standard"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mafintosh/fuse-shared-library-darwin.git"
